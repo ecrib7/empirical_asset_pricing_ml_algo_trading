@@ -14,41 +14,53 @@ There are two ways to interact with this project.
 
 You can access the results directly at https://empiricalassetpricingmlalgotrading-ohi72rrh526mb2iytyecgx.streamlit.app/
 
-You can also run the dashboard locally on your computer:
-The `outputs/paper/` and `outputs/improved/` directories already contain the artifacts the dashboard reads. Just install dependencies and launch:
+You can also run the dashboard locally on your computer. The committed training artifacts under `outputs/<variant>/` (one folder per pipeline variant) are what the dashboard reads — no retraining is needed. Install dependencies and launch Streamlit from `src/dashboard/app.py`:
 
 ```bash
 pip install -r requirements.txt
 streamlit run src/dashboard/app.py
 ```
 
-The dashboard opens in your browser with a variant selector (`paper` / `improved`) in the sidebar. Tabs cover OOS R², comprehensive metrics, Diebold-Mariano heatmaps, portfolio returns, transaction-cost sensitivity, forecast-combination ensembles, regime-conditional evaluation, variable importance, and paper-vs-improved comparison.
+The dashboard opens in your browser with a variant selector in the sidebar. It auto-discovers every `outputs/<variant>/` folder that contains a `metrics.json` — by default this includes `paper`, `improved`, the post-2016 CIZ scoring window (`post2016_ciz`), and the `future2026_*` forward-scenario variants. Tabs cover OOS R², comprehensive metrics, Diebold-Mariano heatmaps, portfolio returns, transaction-cost sensitivity, forecast-combination ensembles, regime-conditional evaluation, variable importance, and the paper-vs-improved comparison.
 
 ### Option B — Reproduce all results from scratch in Google Colab
 
 1. Zip this entire project as `empirical_asset_pricing_ml.zip`.
 2. In Google Drive, create a folder named **exactly** `Algorithmic Trading Project` and upload the zip there.
 3. Open `notebooks/empirical_asset_pricing_ml.ipynb` in Google Colab.
-5. Run all cells top to bottom. Section 0 mounts Drive and unzips the project; Sections 3–5 run the WRDS data pipeline, train all 12 models, and evaluate them; Section 6 launches the dashboard inside Colab via ngrok.
-6. End-to-end runtime is ≈ 24 hrs per variant on a Colab Pro T4. Cell-by-cell, Section 7 runs both `paper` and `improved` back-to-back.
+4. Set `VARIANT` in Section 2 (e.g. `'paper'` or `'improved'`) and your WRDS username.
+5. Run all cells top to bottom. Section 0 mounts Drive and unzips the project; Sections 3–5 run the WRDS data pipeline, train all 12 models via `--mode train --variant <variant>`, and evaluate them; Section 6 launches the dashboard inside Colab via ngrok.
+6. End-to-end runtime is ≈ 24 hrs per variant on a Colab Pro T4. Section 7 chains both `paper` and `improved` back-to-back.
 
 WRDS access is required for the data fetch step (your own credentials, not provided in this repo).
 
 ---
 
-## Two pipelines, one CLI flag
+## Pipeline variants, one CLI flag
 
-| Variant     | Sample period | Macro × char | Industry dummies | Transaction costs                | Forecast combination | Regime analysis |
-|-------------|---------------|:-:|:-:|---|:-:|:-:|
-| `paper`     | 1957 – 2016   | ✅ | ✅ | **0 bps** (gross, matches paper headline) | ✅ | ✅ |
-| `improved`  | 1957 – 2024   | ✅ | ✅ | **Impact-aware** (FIM-style)              | ✅ | ✅ |
+The full variant list exposed by `main.py --variant` is below. The two **core** training pipelines are `paper` and `improved`; the remaining variants are extension / scoring windows that reuse the same model code over different out-of-sample horizons.
 
-Each variant writes to its own `outputs/<variant>/` directory and uses its own cached feature matrix at `data/cache/feature_matrix_<variant>.parquet` — they don't overwrite each other.
+| Variant                     | Sample period           | Role                                                                                |
+|-----------------------------|-------------------------|-------------------------------------------------------------------------------------|
+| `paper`                     | 1957 – 2016             | Strict GKX (2019) reproduction (TC = 0 bps, headline gross numbers).                |
+| `improved`                  | 1957 – 2024             | Extension to 2024 with impact-aware transaction costs (FIM-style).                  |
+| `extended_2024`             | post-paper → 2024-12-31 | Post-paper extension pinned to the legacy `crsp.msf` schema.                        |
+| `extended_ciz_2026`         | post-paper → 2026-03-31 | Same idea using the CIZ-era `crsp_q_stock.*` monthly tables (column-mapped).        |
+| `post2016_ciz`              | 2017-01 → 2026-03       | CIZ-aware **scoring** window for `--mode predict`, reusing `paper` / `improved` per-model pickles over the post-2016 OOS horizon. |
+| `future2026_base`           | forward-looking         | Forward-scenario sandbox used to stress-test the trained models on a baseline path. |
+| `future2026_trending`       | forward-looking         | Trending / momentum-favouring forward path.                                         |
+| `future2026_mean_reversion` | forward-looking         | Mean-reverting forward path.                                                        |
+| `future2026_rotating_leaders` | forward-looking       | Style-rotation forward path.                                                        |
+| `future2026_choppy`         | forward-looking         | Low signal-to-noise / chop regime.                                                  |
+| `future2026_crisis`         | forward-looking         | Drawdown-regime stress path.                                                        |
+| `future2026_factor_rotation`| forward-looking         | Factor-rotation stress path.                                                        |
 
-### Sample-period details
+Each variant writes to its own `outputs/<variant>/` directory and uses its own cached feature matrix at `data/cache/feature_matrix_<variant>.parquet` — they don't overwrite each other. The Streamlit dashboard's variant selector lists exactly the `outputs/<variant>/` folders present in the repo.
+
+### Sample-period details (core variants)
 
 * **1957 – 2016** — paper reproduction window.
-* **2017 – 2024** — extension to test whether GKX-vintage signals survive post-publication. Includes COVID shock (Feb–Apr 2020) and the 2022–23 rate-hike cycle. Adds ~96 months of out-of-sample data (~30 % more than `paper`).
+* **2017 – 2024** — extension in `improved` to test whether GKX-vintage signals survive post-publication. Includes the COVID shock (Feb–Apr 2020) and the 2022–23 rate-hike cycle. Adds ~96 months of out-of-sample data (~30 % more than `paper`).
 
 ## What's in the improved pipeline
 
@@ -86,6 +98,20 @@ Outputs `regimes.csv` per variant. Reveals which strategies post similar Sharpes
 
 ## Quick start (command line)
 
+All pipelines are driven by the same CLI. The general form is:
+
+```bash
+python main.py --mode <mode> --variant <variant> [other flags]
+```
+
+To train any pipeline variant end-to-end (after the feature matrix has been built), use:
+
+```bash
+python main.py --mode train --variant <variant> --models <model list>
+```
+
+For example, the two core training pipelines:
+
 ```bash
 # ── Paper variant (1957-2016, no TC) ────────────────────────────────
 python main.py --mode data-only  --variant paper --wrds-username YOUR_USER
@@ -104,12 +130,34 @@ python main.py --mode train      --variant improved --models NN1 NN2 NN3 NN4
 python main.py --mode evaluate   --variant improved
 python main.py --mode regimes    --variant improved
 python main.py --mode importance --variant improved --models OLS-3 ENet+H PCR PLS GBRT+H
+```
 
-# ── Dashboard (variant selector in sidebar) ─────────────────────────
+### Extension and forward-scenario variants
+
+The `extended_2024` / `extended_ciz_2026` variants build their own feature matrix and then go through the same `--mode train` / `evaluate` / `regimes` flow. `post2016_ciz` and the `future2026_*` variants are typically driven via `--mode predict`, which reuses an existing per-model pickle from a trained variant rather than retraining:
+
+```bash
+# Build feature matrix for the post-2016 CIZ scoring window
+python main.py --mode data-only --variant post2016_ciz --wrds-username YOUR_USER
+
+# Score it using improved-variant model pickles (no retraining)
+python main.py --mode predict --variant post2016_ciz --source-model-variant improved
+python main.py --mode evaluate --variant post2016_ciz
+
+# Same pattern for any future2026_* scenario, e.g.:
+python main.py --mode predict --variant future2026_crisis --source-model-variant improved
+python main.py --mode evaluate --variant future2026_crisis
+```
+
+### Dashboard
+
+```bash
 streamlit run src/dashboard/app.py
 ```
 
-The Colab notebook `notebooks/empirical_asset_pricing_ml.ipynb` drives the same flow with cells for runtime restarts and Drive backups.
+The sidebar's variant selector lists every `outputs/<variant>/` folder that contains a `metrics.json`, so any variant you have produced artifacts for is available without further configuration.
+
+The Colab notebook `notebooks/empirical_asset_pricing_ml.ipynb` drives the same `--mode train --variant <variant>` flow with cells for runtime restarts and Drive backups.
 
 ---
 
@@ -135,7 +183,7 @@ export WRDS_USERNAME=your_wrds_username
 
 ### 3. Welch-Goyal macro data
 
-This part is laready done, the file is in `data/`.
+This part is already done, the file is in `data/`.
 
 Download `PredictorData2023.xlsx` from <https://sites.google.com/view/agoyal145> and place it in `data/` (or pass via `--goyal-csv PATH`).
 
@@ -145,7 +193,7 @@ Download `PredictorData2023.xlsx` from <https://sites.google.com/view/agoyal145>
 
 ```
 empirical_asset_pricing_ml/
-├── main.py                       # CLI: data-only / train / evaluate / regimes / importance / dashboard
+├── main.py                       # CLI: data-only / train / evaluate / regimes / importance / predict / dashboard
 ├── requirements.txt
 ├── configs/
 │   └── experiment.yaml           # Universe, splits, models, costs, portfolio defaults
