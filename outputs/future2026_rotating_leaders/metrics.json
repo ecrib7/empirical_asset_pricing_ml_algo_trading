@@ -1,0 +1,215 @@
+{
+  "OLS-3": {
+    "oos_r2_pct": 0.061293,
+    "hl_sharpe": 0.106382,
+    "hl_sharpe_gross": 0.447048,
+    "hl_mean_turnover_one_way": 1.579706,
+    "hl_engine_tc_bps": 10.0,
+    "hl_returns_are_net_of_tc": true
+  },
+  "ENet+H": {
+    "oos_r2_pct": 0.055843,
+    "hl_sharpe": 1.295648,
+    "hl_sharpe_gross": 1.603487,
+    "hl_mean_turnover_one_way": 1.548936,
+    "hl_engine_tc_bps": 10.0,
+    "hl_returns_are_net_of_tc": true
+  },
+  "PCR": {
+    "oos_r2_pct": 0.139159,
+    "hl_sharpe": -0.144232,
+    "hl_sharpe_gross": 0.162131,
+    "hl_mean_turnover_one_way": 1.541875,
+    "hl_engine_tc_bps": 10.0,
+    "hl_returns_are_net_of_tc": true
+  },
+  "PLS": {
+    "oos_r2_pct": 0.027632,
+    "hl_sharpe": 0.405143,
+    "hl_sharpe_gross": 0.668504,
+    "hl_mean_turnover_one_way": 1.54207,
+    "hl_engine_tc_bps": 10.0,
+    "hl_returns_are_net_of_tc": true
+  },
+  "GLM+H": {
+    "oos_r2_pct": 0.036182,
+    "hl_sharpe": 0.250898,
+    "hl_sharpe_gross": 0.510248,
+    "hl_mean_turnover_one_way": 1.547066,
+    "hl_engine_tc_bps": 10.0,
+    "hl_returns_are_net_of_tc": true
+  },
+  "GBRT+H": {
+    "oos_r2_pct": 0.194556,
+    "hl_sharpe": 0.633695,
+    "hl_sharpe_gross": 0.903592,
+    "hl_mean_turnover_one_way": 1.558131,
+    "hl_engine_tc_bps": 10.0,
+    "hl_returns_are_net_of_tc": true
+  },
+  "NN1": {
+    "oos_r2_pct": 0.159242,
+    "hl_sharpe": 0.254741,
+    "hl_sharpe_gross": 0.543489,
+    "hl_mean_turnover_one_way": 1.550438,
+    "hl_engine_tc_bps": 10.0,
+    "hl_returns_are_net_of_tc": true
+  },
+  "NN2": {
+    "oos_r2_pct": 0.096678,
+    "hl_sharpe": 0.926892,
+    "hl_sharpe_gross": 1.247032,
+    "hl_mean_turnover_one_way": 1.558167,
+    "hl_engine_tc_bps": 10.0,
+    "hl_returns_are_net_of_tc": true
+  },
+  "NN3": {
+    "oos_r2_pct": 0.252194,
+    "hl_sharpe": 0.757147,
+    "hl_sharpe_gross": 1.09528,
+    "hl_mean_turnover_one_way": 1.562518,
+    "hl_engine_tc_bps": 10.0,
+    "hl_returns_are_net_of_tc": true
+  },
+  "NN4": {
+    "oos_r2_pct": 0.199199,
+    "hl_sharpe": 1.507371,
+    "hl_sharpe_gross": 1.749983,
+    "hl_mean_turnover_one_way": 1.55933,
+    "hl_engine_tc_bps": 10.0,
+    "hl_returns_are_net_of_tc": true
+  },
+  "ENS-AVG": {
+    "oos_r2_pct": 0.240127,
+    "hl_sharpe": 1.636301,
+    "hl_sharpe_gross": 1.897393,
+    "hl_mean_turnover_one_way": 1.553417,
+    "hl_engine_tc_bps": 10.0,
+    "hl_returns_are_net_of_tc": true
+  },
+  "ENS-MSE": {
+    "oos_r2_pct": 0.290936,
+    "hl_sharpe": 1.501252,
+    "hl_sharpe_gross": 1.759007,
+    "hl_mean_turnover_one_way": 1.561274,
+    "hl_engine_tc_bps": 10.0,
+    "hl_returns_are_net_of_tc": true
+  },
+  "_reporting": {
+    "variant": "future2026_rotating_leaders",
+    "scenario": "rotating_leaders",
+    "data_start": "2026-04-30",
+    "data_end": "2036-03-31",
+    "test_start": "2026-04-30",
+    "test_end": "2036-03-31",
+    "synthetic": true,
+    "n_months": 120,
+    "engine_tc_bps": 10.0,
+    "panel_source": "synthetic_stock_level",
+    "panel_path": "data/cache/synthetic_panels/future2026_rotating_leaders.parquet",
+    "n_stocks": 800,
+    "n_rows": 96000,
+    "panel_start": "2026-04-30",
+    "panel_end": "2036-03-31"
+  },
+  "_ensembles": {
+    "ENS-AVG": {
+      "constituents": [
+        "OLS-3",
+        "ENet+H",
+        "PCR",
+        "PLS",
+        "GLM+H",
+        "GBRT+H",
+        "NN1",
+        "NN2",
+        "NN3",
+        "NN4"
+      ],
+      "_method": "assumed_uniform_average_over_constituents"
+    },
+    "ENS-MSE": {
+      "constituents": [
+        "OLS-3",
+        "ENet+H",
+        "PCR",
+        "PLS",
+        "GLM+H",
+        "GBRT+H",
+        "NN1",
+        "NN2",
+        "NN3",
+        "NN4"
+      ],
+      "weights": {
+        "OLS-3": 0.10020379695144699,
+        "ENet+H": 0.09691071676346918,
+        "PCR": 0.0981922425716974,
+        "PLS": 0.09912927378331732,
+        "GLM+H": 0.09782757709040998,
+        "GBRT+H": 0.10007649784352536,
+        "NN1": 0.10038689906233483,
+        "NN2": 0.10236387276305484,
+        "NN3": 0.10191011240041843,
+        "NN4": 0.10299901077032571
+      },
+      "val_frac": 0.1,
+      "mse": {
+        "OLS-3": 0.012157328129211891,
+        "ENet+H": 0.012570440917333836,
+        "PCR": 0.012406381679715259,
+        "PLS": 0.01228910888618533,
+        "GLM+H": 0.012452628139873292,
+        "GBRT+H": 0.012172792469580586,
+        "NN1": 0.012135153597833723,
+        "NN2": 0.011900784978617376,
+        "NN3": 0.011953773876189558,
+        "NN4": 0.01182739941112748
+      },
+      "n_obs_per_model": {
+        "OLS-3": 24000,
+        "ENet+H": 24000,
+        "PCR": 24000,
+        "PLS": 24000,
+        "GLM+H": 24000,
+        "GBRT+H": 24000,
+        "NN1": 24000,
+        "NN2": 24000,
+        "NN3": 24000,
+        "NN4": 24000
+      },
+      "eps": 1e-12,
+      "method": "inverse_mse_normalized"
+    },
+    "_source": "recovered_from_ensemble_metadata.json",
+    "_reconstruction": {
+      "method": "inverse_mse_normalized_over_full_oos",
+      "formula": "mse_m = mean((prediction_m - true_returns)^2); raw_w_m = 1/max(mse_m, eps); w_m = raw_w_m / sum(raw_w_m)",
+      "eps": 1e-12,
+      "source_files": [
+        "outputs/future2026_rotating_leaders/models/OLS-3.pkl",
+        "outputs/future2026_rotating_leaders/models/ENet+H.pkl",
+        "outputs/future2026_rotating_leaders/models/PCR.pkl",
+        "outputs/future2026_rotating_leaders/models/PLS.pkl",
+        "outputs/future2026_rotating_leaders/models/GLM+H.pkl",
+        "outputs/future2026_rotating_leaders/models/GBRT+H.pkl",
+        "outputs/future2026_rotating_leaders/models/NN1.pkl",
+        "outputs/future2026_rotating_leaders/models/NN2.pkl",
+        "outputs/future2026_rotating_leaders/models/NN3.pkl",
+        "outputs/future2026_rotating_leaders/models/NN4.pkl"
+      ],
+      "observations_per_model": {
+        "OLS-3": 24000,
+        "ENet+H": 24000,
+        "PCR": 24000,
+        "PLS": 24000,
+        "GLM+H": 24000,
+        "GBRT+H": 24000,
+        "NN1": 24000,
+        "NN2": 24000,
+        "NN3": 24000,
+        "NN4": 24000
+      }
+    }
+  }
+}
